@@ -44,7 +44,7 @@ class Game(Board):
         for i in range(X_LENGTH):
             for j in range(Y_LENGTH):
                 if self.next_gen[i,j] == 1:
-                    pg.draw.circle(self.screen, [random.randrange(100,255) for _ in range(3)], self.grid[i,j], RADIUS)
+                    pg.draw.circle(self.screen, (0,120,240), RADIUS)
         #RULE #4: ALL OTHER LIVING CELLS DIE
         self.next_gen[self.next_gen > 0] = 0 
                 
