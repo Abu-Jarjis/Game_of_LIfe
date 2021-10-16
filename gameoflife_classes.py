@@ -5,11 +5,11 @@ import sys
 import random
 
 np.set_printoptions(threshold=sys.maxsize)
+clock = pg.time.Clock()
 #------------------------------
-RADIUS = 4
+RADIUS = 5
 X_LENGTH = math.ceil(1200/(RADIUS*2)) 
 Y_LENGTH = math.ceil(1000/(RADIUS*2))
-clock = pg.time.Clock()
 class Board:
     def __init__(self, grid_height, grid_width, grid, screen) -> None:
         self.grid = grid
@@ -19,13 +19,14 @@ class Board:
         self.color = (0,0,0)
 
     def add_Grid(self):
-        for n1,i in enumerate(range(0, self.grid_width ,RADIUS*2)):
-            for n2,j in enumerate(range(0, self.grid_height, RADIUS*2)):
-                self.grid[n1,n2] = (i,j)
+        for n1,i in enumerate(range(0, self.grid_height ,RADIUS*2)):
+            for n2,j in enumerate(range(0, self.grid_width, RADIUS*2)):
+                self.grid[n1,n2] = (j,i)
+
     def draw_Grid(self):
-        for i in range(X_LENGTH):
-            for j in range(Y_LENGTH):
-                pg.draw.circle(self.screen, (0,0,0), self.grid[i,j], RADIUS, width=1)
+        for i in range(Y_LENGTH):
+            for j in range(X_LENGTH):
+                pg.draw.circle(self.screen, self.color, self.grid[i,j], RADIUS, width=1)
 
 class Game(Board):
     def __init__(self, grid_height, grid_width, temp, grid, next_gen, screen) -> None:
@@ -34,17 +35,17 @@ class Game(Board):
         self.next_gen = next_gen
     
     def random_game(self):
-        for i in range(X_LENGTH):
-            for j in range(Y_LENGTH):
+        for i in range(Y_LENGTH):
+            for j in range(X_LENGTH):
                 self.temp[i,j] = random.randint(0,1)
     def evolve_cell(self, alive, neighbours):
         return neighbours == 3 or (alive and neighbours == 2)
 
     def draw_cell(self):
-        for i in range(X_LENGTH):
-            for j in range(Y_LENGTH):
+        for i in range(Y_LENGTH):
+            for j in range(X_LENGTH):
                 if self.next_gen[i,j] == 1:
-                    pg.draw.circle(self.screen, (0,120,240), RADIUS)
+                    pg.draw.circle(self.screen, (0,120,240), self.grid[i,j], RADIUS)
         #RULE #4: ALL OTHER LIVING CELLS DIE
         self.next_gen[self.next_gen > 0] = 0 
                 
@@ -60,8 +61,8 @@ class Game(Board):
             except:IndexError
 
     def Evolve(self):
-        for i in range(X_LENGTH):
-            for j in range(Y_LENGTH):
+        for i in range(Y_LENGTH):
+            for j in range(X_LENGTH):
                     neighbour = self.check_alive(i,j)
                     if not self.temp[i,j] and neighbour == 3:
                         self.next_gen[i,j] = 1
@@ -71,7 +72,6 @@ class Game(Board):
                         pass
                         
                     
-                    #print(new_grid[i,j])
         self.temp[:,:] = self.next_gen[:,:] 
     
         self.draw_cell()
@@ -87,14 +87,15 @@ def main():
     #Grid data
     grid_width = width
     grid_height = height
-    grid = np.zeros((X_LENGTH,Y_LENGTH), dtype = tuple)
-    temp = np.zeros((X_LENGTH,Y_LENGTH), dtype = int)
-    next_gen = np.zeros((X_LENGTH,Y_LENGTH), dtype = int)
+    grid = np.zeros((Y_LENGTH,X_LENGTH), dtype = tuple)
+    temp = np.zeros((Y_LENGTH,X_LENGTH), dtype = int)
+    next_gen = np.zeros((Y_LENGTH,X_LENGTH), dtype = int)
 
 
     game = Game(grid_height, grid_width, temp, grid, next_gen, screen)
     game.add_Grid()
     game.random_game()
+    
 
     while True:
         for event in pg.event.get():
@@ -105,5 +106,5 @@ def main():
         game.draw_Grid()
         game.Evolve()
             
-        clock.tick(20)
+        clock.tick(30)
         pg.display.update()
