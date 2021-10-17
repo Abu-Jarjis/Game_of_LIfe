@@ -76,7 +76,7 @@ class Game(Board):
     
         self.draw_cell()
 
-def main():
+def Game_of_Life():
 
     #Screen
     height = 1000
