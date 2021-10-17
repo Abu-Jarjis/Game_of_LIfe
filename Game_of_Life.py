@@ -3,8 +3,8 @@ import pygame as pg
 import math
 import sys
 import random
-from Game_of_Life import main
+from classes import Game_of_Life
 #-----------------------
 
-Start_Game = main
+Start_Game = Game_of_Life
 Start_Game()
