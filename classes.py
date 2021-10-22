@@ -1,18 +1,16 @@
 import numpy as np
-from numpy.lib.utils import safe_eval
 import pygame as pg
 import math
 import sys
 import random
 
-from pygame.display import set_caption
-
+pg.init()
 np.set_printoptions(threshold=sys.maxsize)
 clock = pg.time.Clock()
 pg.display.set_caption("Game of Life")
 #------------------------------
 STATE = 1
-RADIUS = 4
+RADIUS = 5
 X_LENGTH = math.ceil(1200/(RADIUS*2)) 
 Y_LENGTH = math.ceil(1000/(RADIUS*2))
 class Board:
@@ -21,7 +19,7 @@ class Board:
         self.grid_height = grid_height
         self.grid_width = grid_width
         self.screen = screen
-        self.color = (0,0,100)
+        self.color = (0,40,0)
 
     def add_Grid(self):
         for n1,i in enumerate(range(0, self.grid_height ,RADIUS*2)):
@@ -39,7 +37,7 @@ class Game(Board):
         self.temp = temp
         self.next_gen = next_gen
         self.state = state
-        self.color_cell = (0,120,240)
+        self.color_cell = (0,250,100)
     def random_game(self):
         for i in range(Y_LENGTH):
             for j in range(X_LENGTH):
@@ -52,7 +50,7 @@ class Game(Board):
             for j in range(X_LENGTH):
                 if self.next_gen[i,j] == 1:
                     pg.draw.circle(self.screen, self.color_cell, self.grid[i,j], RADIUS)
-        #RULE #4: ALL OTHER LIVING CELLS DIE
+        #RULE #4: ALL OTHER LIVING CELLS DIE, DEAD STAY DEAD
         self.next_gen[self.next_gen > 0] = 0 
                 
 
@@ -79,6 +77,14 @@ class Game(Board):
                         
         self.temp[:,:] = self.next_gen[:,:] 
         self.draw_cell()
+    def Generation(self, x, y, font, Gen):
+        generation = font.render("GEN: " + str(Gen), True, self.color_cell)
+        self.screen.blit(generation, (x, y))
+        if self.temp[:,:].any():
+            return Gen + 1
+        else:
+            return 0
+
     
     def event_handler(self, event, keys):
         if event.type == pg.QUIT:
@@ -101,8 +107,10 @@ class Game(Board):
                     within_cell = [(x,y) for y, x in enumerate(temp_grid) if math.dist(x, pg.mouse.get_pos()) < RADIUS]
                     if within_cell:
                         break
-                self.temp[i,within_cell[0][1]] = 1
+                if not self.temp[i,within_cell[0][1]]:
+                        self.temp[i,within_cell[0][1]] = 1
                 pg.draw.circle(self.screen, self.color_cell, within_cell[0][0], RADIUS)
+
             except IndexError: pass
  
 
@@ -121,11 +129,16 @@ def Game_of_Life():
     temp = np.zeros((Y_LENGTH,X_LENGTH), dtype = int)
     next_gen = np.zeros((Y_LENGTH,X_LENGTH), dtype = int)
 
-
+    #generation
+    generation = 1
+    x,y = 10,10
+    font = pg.font.Font("computer_pixel-7.ttf", 48)
+    
+    #Initialise
     game = Game(grid_height, grid_width, temp, grid, next_gen, screen, state=1)
     game.add_Grid()
     #game.random_game()
-    #game.temp[:, 0:X_LENGTH//2:3] = 1
+    game.temp[:, 0:X_LENGTH//2:3] = 1
     
     
 
@@ -138,8 +151,10 @@ def Game_of_Life():
             screen.fill(color)
             game.draw_Grid()
             game.Evolve()
+            generation = game.Generation(x, y, font, generation)
             pg.display.update()
         else:
             pg.display.update()
         clock.tick(30)
+        
 
